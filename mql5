@@ -1,0 +1,90 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                            SpiritFxSniperBot.mq5 |
+//|                          Copyright 2021, Forex Robot Easy Team    |
+//|                                https://www.forexroboteasy.com     |
+//+------------------------------------------------------------------+
+
+// Global variables
+input double LotSize = 0.01; // Default lot size
+input double TakeProfit = 100.0; // Default take profit in pips
+input double StopLoss = 50.0; // Default stop loss in pips
+input int MaxEntries = 3; // Default maximum number of entries
+
+// Define trade direction
+enum TradeDirection
+{
+    TD_BUY,
+    TD_SELL
+}
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    // Set initial parameters
+    SetProfitTarget(TakeProfit);
+    SetStopLoss(StopLoss);
+    
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+    // Perform necessary clean up tasks
+}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+    // Calculate moving average
+    double ma = iMA(NULL, 0, 14, 0, MODE_SMA, PRICE_CLOSE, 0);
+    
+    // Calculate stochastic indicator
+    double stoch = iStochastic(NULL, 0, 5, 3, 3, MODE_SMA, STO_LOWHIGH, 0, MODE_SIGNAL, 0);
+    
+    // Check for entry conditions
+    if (stoch < 20 && Close[0] > ma)
+    {
+        // Open buy trade
+        OpenTrade(TD_BUY);
+    }
+    else if (stoch > 80 && Close[0] < ma)
+    {
+        // Open sell trade
+        OpenTrade(TD_SELL);
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Function to open a trade                                          |
+//+------------------------------------------------------------------+
+void OpenTrade(TradeDirection direction)
+{
+    // Calculate trade volume
+    double volume = LotSize / MaxEntries;
+    
+    // Open trade with specified parameters
+    if (direction == TD_BUY)
+    {
+        // Buy trade
+        OrderSend(Symbol(), OP_BUY, volume, Ask, 0, 0, 0, 'SpiritFxSniperBot', 0, 0, Green);
+    }
+    else if (direction == TD_SELL)
+    {
+        // Sell trade
+        OrderSend(Symbol(), OP_SELL, volume, Bid, 0, 0, 0, 'SpiritFxSniperBot', 0, 0, Red);
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Custom functions                                                  |
+//+------------------------------------------------------------------+
+// Add any additional custom functions here
+
